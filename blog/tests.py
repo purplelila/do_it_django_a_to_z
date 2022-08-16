@@ -1,11 +1,20 @@
 from django.test import TestCase, Client
 from bs4 import BeautifulSoup
+from django.contrib.auth.models import User
 from .models import Post
 
 # Create your tests here.
 class TestView(TestCase):
-    def setup(self):
+    def setUp(self):
         self.client = Client()
+        self.user_trump = User.objects.create_user(
+            username=' trump',
+            password=' somepassword'
+        )
+        self.user_obama = User.objects.create_user(
+            username='obama',
+            password='somepassword'
+        )
 
     def navbar_test(self, soup):
         navbar = soup.nav
@@ -23,6 +32,7 @@ class TestView(TestCase):
 
         about_me_btn = navbar.find('a', text='About me')
         self.assertEqual(about_me_btn.attrs['href'], '/about_me/')
+
 
     def test_post_list(self):
         # 1.1 포스트  목록 페이지를 가져온다.
@@ -45,10 +55,12 @@ class TestView(TestCase):
         post_001 = Post.objects.create(
             title='첫 번째 포스트다.',
             content='집에 가고 싶잖아?',
+            author=self.user_trump,
         )
         post_002 = Post.objects.create(
             title='두 번째 포스트다.',
             content='숨 참고 러브 다이브',
+            author=self.user_obama,
         )
         self.assertEqual(Post.objects.count(), 2)
 
@@ -62,6 +74,9 @@ class TestView(TestCase):
         self.assertIn(post_002.title, main_area.text)
         # 3.4 '아직 게시물이 없습니다'라는 문구는 더 이상 나타나지 않는다.
         self.assertNotIn('아직 게시물이 없슴돠', main_area.text)
+
+        self.assertIn(post_001.author.username.upper(), main_area.text)
+        self.assertIn(post_002.author.username.upper(), main_area.text)
 
     def test_post_detail(self):
         # 1.1 Post가 하나 있다.
