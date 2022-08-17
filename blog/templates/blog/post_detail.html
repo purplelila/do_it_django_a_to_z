@@ -9,10 +9,15 @@
                         <!-- Post header-->
                         <header class="mb-4">
                             <!-- Post title-->
+                            {% if user.is_authenticated and user == post.author %}
+                                <a class="btn btn-outline-secondary btn-sm float-end" href="/blog/update_post/{{ post.pk }}/" role="button">
+                                    <i class="fas fa-pen"></i>&nbsp;&nbsp; Edit Post
+                                </a>
+                            {% endif %}
                             <h1 class="fw-bolder mb-1">{{ post.title }}</h1>
                             <!-- Post categories-->
                             {% if post.category %}
-                                <a class="badge bg-secondary float-end" href="#!">{{ post.category}}</a>
+                                <a class="badge bg-secondary float-end" href="#!">{{ post.category }}</a>
                             {% else %}
                                 <a class="badge bg-secondary float-end" href="#!">미분류</a>
                             {% endif %}
